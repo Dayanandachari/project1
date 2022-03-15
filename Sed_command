@@ -1,0 +1,18 @@
+sed 's/pattern1/pattern2/g' filename
+sed -i 's/pattern1/pattern2/Ig' filename 
+sed -i '$s/patten1/pattern2/Ig' filename
+sed -i '2,3s/patrn1/patrn2/Ig' filename 
+sed -i '2;5s/partn1/patrn2/Ig' filename 
+sed -i '3s/pattern1/pattern2/2g' filename
+sed -i '4s/pattern1/pattern2/2' filename 
+sed -i '3s/pattern/ / Ig' filename
+sed -i '4d' filename 
+sed -i '3,5d' filename 
+sed -i '3d;4d' filename 
+sed -i '/pattern/d' filename 
+sed -i '^$' fileame 
+sed -n '4p' filename 
+sed -n '3,4p' filename 
+sed -n '3p;4p' fiename 
+sed -n '$p' filename 
+
