@@ -1,0 +1,13 @@
+piVersion: v1
+metadata:
+  name: pvc-sc-example
+spec:
+  selector:
+    matchLabels:
+      type: hostpath
+  accessModes:
+    - ReadWriteMany
+  storageClassName: mypvsc
+  resources:
+    requests:
+      storage: 500M
