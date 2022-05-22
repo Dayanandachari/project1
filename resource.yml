@@ -1,0 +1,44 @@
+POD quota:
+
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: pod-quota
+  namespace: learning
+spec:
+  hard:
+    pods: "4"
+
+
+resource quota: it will give for particular container 
+
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: pod-quota
+  namespace: learning
+spec:
+  hard:
+    requests.cpu: "1"
+    requests.memory: 1Gi
+    limits.cpu: "2"
+    limits.memory: 2Gi
+    pods: 4
+
+---------------------------------
+
+to limit the range of continers:
+
+CPU Limit range
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: cpu-limit-range
+  namespace: learning
+spec:
+  limits:
+  - default:
+      cpu: 1
+    defaultRequest:
+      cpu: 0.4
+    type: Container
