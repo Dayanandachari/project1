@@ -1,0 +1,646 @@
+JASON format  : 
+{
+  servers: [
+     { 
+       name: server1
+       .......
+     }, 
+   {
+     name: server2
+    }
+ ]
+}
+==============================
+YAML Key value pair: 
+
+name: dayanand
+fruits: mango
+
+"name" is a Key & dayanand is value
+===========================
+
+Array List:
+
+fruit:
+- orange
+- apple
+- mango
+Fruit is a Key  
+orange, apple , mango are array list
+
+YML contains multiple array list in above format 
+
+================================
+
+Dictonary/ Map
+
+Orange: 
+  calories: 105
+  fat: 23
+  
+  
+Orange is a main Key and calories is a value
+ main key can have multiple key values in above format 
+
+===========================================================
+ YAML Advanced: 
+
+YAML contain Mix of all above key , array , dictionary format
+
+fruits: 
+  - orange: 
+      calories: 105
+      fat: 23
+  - grapes: 
+      calories: 112
+      fat: 23
+
+ -orange and - grapes are array list of fruit key and it should be in ordered 
+array list supports ordered way of represention 
+
+Under Orange, it has multiple key value which are dictionry
+ and it can be unordered. 
+dictionary supports unordered way of represention 
+=====================================
+
+POD definition ; 
+
+HOw do we create a POD?
+Ans: create a POD we need  Manifest file of kind pod or YAML manifest
+
+Note: Always yaml in kubernetes contains apiVersion at first line 
+because API server will understand the REST launguage 
+
+Note: we cant access the pods directly and it can only access through service 
+
+
+apiVersion : v1 
+kind: Pod
+metadata: 
+  name: mypod
+  lable: 
+    app: myapp
+    type: frontend 
+spec: 
+  containers: 
+    - name: jenkins
+      image: jenkins/jenkins:lts
+
+--------------------------------------------------
+commands: 
+kubectl get pod ---- to check pods
+kubectl apply -f filename.yml  ---- to create pod
+(command to communicate with api server)
+
+kubectl get pods -owide --------> on which machine it is running 
+kubectl get nodes ---check nodes
+kubectl delete pod podname ------> to delete the pod 
+kubectl get replicaset ---->  to check replica set yml 
+kubectl apply -f podname.tml -----> to apply the 
+kubectl exec -it file.yml bash ----> to go inside the pods 
+------------------------------------------------------------------
+
+pod IP : is only valid inside cluster  can access only within cluster not browser
+only used to communicate b/w pods
+cross check using curl -v 
+----------------------------------------------------------------
+services:
+we have four type 
+cluster IP 
+node port 
+load balancer 
+external name 
+-----------------------------------------------------------------
+
+application UI ----> requires data ---> data coming from pod called DB ---> DB will be not exposed 
+---- > define DB within cluster ------> only UI will access DB through node port (can acess thrugh browser)
+
+
+================================================================================================== 
+
+appVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: dayareplica
+spec:
+  replicas: 2
+  selector: 
+    matchLables:
+      app: jenkinsreplica
+  template: 
+    metadata:
+      name:mypod
+      labels: 
+        app: jenkinsreplica
+      type: frontend
+    spec: 
+      containers: 
+        - name: jenkins
+          image: jenkins/jenkins:lts
+ 
+
+all replicas are same container and exposed to same port .. 
+it will have same service 
+all replica will have same data
+
+if we delete the one pod which we have created from replica.yml
+automatically it will create the pod as we mentioned in the replica.yml 
+
+if one pods goes down other pod will be up
+
+need to mount the volume for all pod that why it wont take the password token of jenkins 
+because each replica will have different password token 
+
+we can create the EFS to mount volume
+
+cluster IP 
+=============================================================
+Service YAML
+apiVersion: v1
+kind: service
+metadata: 
+  name: repservice
+spec: 
+  type: Nodeport
+  selector: 
+    app: jenkinsreplica
+  ports: 
+    - name: jen1
+      protocol: TCP
+      port: 8080
+      nodePort: 30001
+      targetPort: 8080
+
+
+====================================================
+YAML (yet another mark-up language) File: YAML is a human readable data serialization language.
+ It is commonly used for configuration files and in applications where data is being stored
+
+pods are smallest object running int he
+
+
+YAML (yet another mark-up language) File: YAML is a human readable data serialization language. It is commonly used for configuration files and in applications where data is being stored
+
+A Pod represents processes running on your Cluster.
+
+As pod is a single instance of a application.
+
+Kubernetes doesn't deploy container directly. Its inside a pod.
+
+pending: if the container is not neither in running or terminated state it is pending.
+
+Running: the running status indicates the container is running without issues
+
+Terminated: the container in the terminated stage will began execution and then either run to completion or fail for some reason.
+------------------------------------------------------------------------------------------------------
+A replicaset is a set of pod templates that describes a set of pod replicas. It uses a template that describes what each pod must contain.
+
+The replicaset ensures that a specified number of pod replicas are running at any time.
+
+We want to replicate containers (and thereby applications) for several reasons, including:
+
+#1 - Reliability: By having multiple versions of an application, you prevent problems if one or more fails. 
+This is particularly true if the system replaces any containers that fail.
+
+#2 - Load balancing: Having multiple versions of a container enables you to easily send traffic to different 
+instances to prevent overloading of a single instance or node. This is something that Kubernetes does out of the box,
+making it extremely convenient.
+
+#3 - Scaling: When load does become too much for the number of existing instances, Kubernetes enables you to
+easily scale up your application, adding additional instances as needed.
+
+making it extremely convenient.
+#3 - Scaling: When load does become too much for the number of existing instances, Kubernetes enables you to
+easily scale up your application, adding additional instances as needed.
+However, a Deployment is a higher-level concept that manages ReplicaSets and provides declarative updates to
+Pods along with a lot of other useful features.
+Therefore, its recommended using Deployments instead of directly using ReplicaSets, 
+unless you require custom update orchestration or don’t require updates at all.A deployment is an object in Kubernetes that lets you manage a set of identical pods. Without a deployment, you’d need to create, update, and delete a bunch of pods manually.
+With a deployment, you declare a single object in a YAML file.
+This object is responsible for creating the pods, making sure they stay up to date, and ensuring there are enough of them running.
+
+https://github.com/PrajwalDV21/vikaskubernetes
+---------------------------------------------------------------------
+Rollingupdate:
+Kubernetes deployments rollout pod version updates with a rolling update strategy.
+This strategy aims to prevent application downtime by keeping atleast some instance up and running at any point intime while performing the updates.
+Old pods are only shutdown after new pods of the new deployment version have started up and became ready to handle the traffic.
+
+MaxSurge: it indicates maximum number of pods need to be created before terminating the old pods.
+
+maxUnavailable: this indicamaxUnavailable: this indicates number of unavailable pods 
+during rolling updatesKubernetes 
+
+Pods are mortal. They are born and when they
+die, they are not resurrected. If you use a Deployment to run
+your app, it can create and destroy Pods dynamically.
+
+Publishing service:
+K8s service type allows you to specify what kind of service you want, the default is cluster IP
+
+Type values and their behaviours are:
+
+ClusterIP:  Exposes the service on a cluster internal IP. 
+Using this value makes the service only reachable from within the cluster. This is the default service type.
+
+NodePort: exposes the service on each nodes IP at a static port.
+A cluster IP service, to which the nodes port service routes are automatically created.
+Range
+30000 - 32767
+
+LoadBalancer: exposes the service externally using a cloud providers load balancer.
+Node port and cluster IP services, to which the external load balancer routes or automatically created.
+
+ExternalName/ExternalIP: maps the service to the content of external fields by written a C name records within a value.
+=============================================
+Default k8s namespaces are.
+Default: adding an object to a cluster without providing a namespace will place it within the default namespace
+Kube-system: kube system namespace is used for k8s components managed by k8s
+Kube-public: kube public it is readable by everyone, but the namespace is reserved for system usage
+we follow agile methodology where the 
+--------------------------------------------------------------
+
+
+POD quota:
+
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: pod-quota
+  namespace: learning
+spec:
+  hard:
+    pods: "4"
+
+
+resource quota: it will give for particular container 
+
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: pod-quota
+  namespace: learning
+spec:
+  hard:
+    requests.cpu: "1"
+    requests.memory: 1Gi
+    limits.cpu: "2"
+    limits.memory: 2Gi
+    pods: 4
+
+---------------------------------
+
+to limit the range of continers:
+
+CPU Limit range
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: cpu-limit-range
+  namespace: learning
+spec:
+  limits:
+  - default:
+      cpu: 1
+    defaultRequest:
+      cpu: 0.4
+    type: Container
+
+
+Memory limit range:
+
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: memory-limit-range
+  namespace: learning
+spec:
+  limits:
+  - default:
+      memory: 500Mi
+    defaultRequest:
+      memory: 250Mi
+    type: Container
+
+kubectl decribe namespce jenkins 
+1CPU = 1000 mili core
+
+----------------------------------
+
+
+Node affinity 
+
+affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: size
+            operator: NotIn
+            values:
+            - small
+
+===========================================
+
+to taint the node: kubectl taint node k8s-slave1 colour=blue:Noschedule
+
+to un taint the node : kubectl taint node k8s-slave1 colour=blue:Noschedule-
+
+to check the taint - KUbectl describe nameofnode 
+
+to delete the deployment : kubectl delete apply -f deplyemnt.yml or kubectl delete deploy deplyemntname
+
+kubectl get node 
+kubectl get pod -owide 
+to label the node : kubectl label node node_name  environment=red   
+to check labels : kubectl get node --show-labels
+
+=========================================================
+
+
+only single file or two file use config map 
+
+
+spec: 
+   containers: 
+     - name: tomcat 
+       image: tomcat:latest
+       volumeMounts:
+         - name: configvolume
+           mountPath: /usr/local/tomcat/webapps
+   volumes: 
+     - name: configvolume 
+       configMap: 
+         name: testfile 
+
+kubectl apply -f deploy.yml
+kubectl  get pod
+kubectl exec -it tomcat_pod_file_name bash
+
+check file in webapp there in the pod  
+
+
+create one more file and add content 
+
+kubectl get configmap 
+kubectl delete cm configmap_filename   ------ to delete config map 
+kubectl create configmap testfile -- from-file=firstfile=firstfilename --from-file=secondfile=secondfilename
+------> to 
+
+kubectl  get pod
+kubectl exec -it tomcat_pod_file_name bash
+
+=================================================================================
+Secret volume type: 
+
+spec: 
+   containers: 
+     - name: tomcat 
+       image: tomcat:latest
+       volumeMounts:
+         - name: secretvolume
+           mountPath: /usr/local/tomcat/webapps
+   volumes: 
+     - name: secretvolume
+       secret: 
+          secretName: secretfile
+
+
+kubectl apply -f secret.yml
+kubectl describe secret scretfile
+kubectl exec -it tomcat_pod_file_name bash
+
+https://kubernetes.io/docs/concepts/configuration/secret/
+https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/
+
+
+==================================================================================
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: private-reg
+spec:
+  containers:
+  - name: private-reg-container
+    image: <your-private-image>
+  imagePullSecrets:
+  - name: regcred
+
+
+https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+==========================================================================================
+Cluster Set up 
+
+step 1. spin up 2 new instances
+
+step 2- need to tag the resources 
+kubernetes.io/cluster/ clusterID ---> owned 
+tag below resources
+- VPC & subnet 
+-  security
+- storage / volume
+- network interfaces
+
+folloow master K8 set up 
+- install docker 
+
+/etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+- 
+# Note: This dropin only works with kubeadm and kubelet v1.11+
+[Service]
+Environment="KUBELET_KUBECONFIG_ARGS=--cloud-provider=aws --bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.c
+onf"
+Environment="KUBELET_CONFIG_ARGS=--config=/var/lib/kubelet/config.yaml"
+# This is a file that "kubeadm init" and "kubeadm join" generates at runtime, populating the KUBELET_KUBEADM_ARGS variable dynamically
+EnvironmentFile=-/var/lib/kubelet/kubeadm-flags.env
+# Th
+
+
+
+
+
+
+
+Application Load Balancer
+Network Load Balancer
+Classic Load Balancer
+Gateway Load Balancers
+
+
+Grafana is an open-source analytical platform used to analyze and monitoring time-series data. 
+querying, visualizing, and exploring metrics and logs no matter where they are stored.
+
+===================================================================================kind: PersistentVolumeClaim
+persistent volume
+
+apiVersion: v1
+metadata:
+  name: pvc-sc-example
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: mypvsc
+  resources:
+    requests:
+      storage: 1Gi
+
+
+
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: aws-ebs-gp2
+provisioner: kubernetes.io/aws-ebs
+parameters:
+  encrypted: "true"
+
+============================================================================
+
+
+step1 : create storage class
+step2 : create pvc(persistanct claim ,it will take care of creating the pv)
+step : verify in the aws if teh volume is created and in available state 
+step 4 : create deployment with volume claim 
+step 5: creaet service 
+
+=======================================================
+
+curl https://raw.githubusercontent.com/kubernetes-sigs/aws-ebs-csi-driver/master/deploy/kubernetes/secret.yaml > secret.yaml
+# Edit the secret with user credentials
+kubectl apply -f secret.yaml
+kubectl apply -k "github.com/kubernetes-sigs/aws-ebs-csi-driver/deploy/kubernetes/overlays/stable/?ref=release-1.5"
+curl https://raw.githubusercontent.com/kubernetes-sigs/aws-ebs-csi-driver/master/deploy/kubernetes/secret.yaml > secret.yaml
+# Edit the secret with user credentials
+kubectl apply -f secret.yaml
+kubectl apply -k "github.com/kubernetes-sigs/aws-ebs-csi-driver/deploy/kubernetes/overlays/stable/?ref=release-1.5"
+==================================================================================
+
+
+
+Kubernetes networking:
+There are 5 essential things to understand about networking in Kubernetes
+Communication between containers on same pod
+Communication between pods on same node
+Communication between pods on different nodes
+Communication between pods and services
+How does DNS work and how do we discover IP addresses?
+
+
+What is network namespace:
+It is a collection of network interfaces (connection between two pieces of equipment on a network) 
+and routing tables (instruction for where to send a network traffic)
+
+
+There is a secret container that runs on every pod in k8s.
+These containers first job is to keep the namespace open in case all the other containers or pods die. Its called pause containers. 
+Every pod has a unique IP.
+This pod IP is shared by all containers in this pod, and its route table from all the other pods.
+Pause containers are called sandbox containers, whose only job is to reserve and hold a network 
+namespace which is shared by all the containers in a pod. This way, a pod IP doesn’t change a 
+container dies and a new container is created in a space.
+A huge benefits of the IP per pod is there are no IP of port collision with the underlying 
+ports and we don’t have to worry about what port the application use.
+
+Communication between containers on same pod (intranode communication)
+
+On every k8s node, which is a Linux machine, there is a root network namespace- root netns. 
+The main network interfaces eth0 is root netns.
+Similarly, each pod has its own netns with a virtual ethernet pair connecting it to the root netns.
+
+
+Inter-node communication:
+"add the diagram"
+
+Communication between pods and services:
+Overlay network:
+
+
+Kubernetes does not provide any default network implementation, rather it only defines the model and leaves to other tools to implement it.
+
+There are many implementations nowadays, calico is one of them and one of the simplest.
+Overlay networks are not required by default, however, they help in specific situations. Like when we don’t have enough IP space, 
+or network can’t handle the extra routes or when we want some extra management features the overlays provide.
+
+
+There are three networks in this cluster:
+Host network: all instances are in one VPC subnet 172.20.32.0/19. They have been assigned ipaddresses in this range,
+ all hosts can connect to each other because they are in same LAN.
+Flannel/calico overlay network: flannel has created another network 100.96.0.0/16, 
+it’s a bigger network which can hold 216(65536) addresses, and it’s across all Kubernetes nodes,
+each pod will be assigned one address in this range, later we will see how flannel achieves this.
+In-Host docker network: inside each host, flannel assigned a 100.96.x.0/24 network to all pods in this host, 
+it can hold 28(256) addresses. The docker bridge interface docker0 will use this network to create new containers.
+
+
+=====================================================================
+
+livenessProbe:
+      tcpSocket:
+        port: 8080
+      initialDelaySeconds: 15
+      periodSeconds: 20
+
+
+Liveliness probe:
+Liveness and Readiness probes are used to control the health of an application 
+running inside a Pod’s container. Both are very similar in functionality, and usage.
+Readiness probe:
+In some cases, we would like our applications to be alive but not serve the traffic 
+unless some conditions are met. In such cases we use readiness probe if the condition inside 
+readiness probe passes, then only our applications can serve the traffic.
+Readiness probe runs on the container during its whole life cycle.
+
+Strartup probe : wait for the container to be up and running 
+
+Note: liveliness probe doesn’t wait for readiness probe to succeed.
+ If you want to wait before executing a liveliness probe you should use a initial delay seconds.
+initialDelaySeconds: 3
+This is the delay which tells kubelet to wait for 3 seconds before performing the first probe
+periodSeconds: 5
+This field specifies that kubelet should perform a probe every 5 seconds.Both liveliness and readiness probe are used to control the health of the application. 
+Failing liveliness probe will restart the container, whereas failing readiness probe will stop our application from serving the traffic.
+
+Probes
+Probes are executed by kubelet to determine pods' health.
+
+All three types of probes have common settings to configure.
+
+initialDelaySeconds: How many seconds to wait after the container has started (default: 0)
+periodSeconds: Wait time between probe executions (default: 10)
+timeoutSeconds: Timeout of the probe (default: 1)
+successThreshold: Threshold needed to mark the container healthy. (default: 1)
+failureThreshold: Threshold needed to mark the container unhealthy. (default: 3)
+
+
+
+livenessProbe:
+      exec:
+        command:
+        - cat
+        - /tmp/healthy
+      initialDelaySeconds: 5
+      periodSeconds: 5
+livenessProbe:
+      httpGet:
+        path: /healthz
+        port: 8080
+        httpHeaders:
+        - name: Custom-Header
+          value: Awesome
+      initialDelaySeconds: 3
+      periodSeconds: 3
+Prajwal DV6:54 AM
+readinessProbe:
+  exec:
+    command:
+    - cat
+    - /tmp/healthy
+  initialDelaySeconds: 5
+  periodSeconds: 5
+
+================================================
+
+Autoscaling : 
+
+https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/
